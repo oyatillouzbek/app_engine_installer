@@ -11,8 +11,9 @@ import threading
 import requests
 import json
 from google.appengine.ext import ndb
+from google.appengine.api import urlfetch
 import time
-from time import sleep
+from time import sleep *
 from datetime import datetime, timedelta
 import telebot
 from telebot import types
@@ -105,9 +106,6 @@ def setEnabled(chatid, enable=True):
             'ok'
     fv.open('./enabled_list.uzsdb', 'w').write('\n'.join(enable_list))
     return
-
-def next_step(chatid, stepstr):
-    fv.open('./users/info_' + str(chatid) + '.uzsdb', 'w').write(stepstr)
     
 @bot.callback_query_handler(func=lambda call: True)
 def callback_inline(call):
@@ -132,26 +130,132 @@ def callback_inline(call):
             except Exception as e:
                 bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text="Hato:\n" + str(e))
 
-
-@bot.message_handler(func=lambda message: True, content_types=['new_chat_member'])
-def new_chat_member(message):
-    chat_id = message.chat.id #gruppani telegramdagi id si
+@bot.edited_message_handler(func=lambda message: True, content_types=['text','photo','sticker','document','video','audio','voice'])
+def edit_message(message):
     try:
-        user_id = message.new_chat_member.id
-    except:
+        first_name = message.from_user.first_name.decode("utf-8")
+        last_name = message.from_user.last_name
         user_id = message.from_user.id
-    #user_id - gruppaga qo'shilgan odam id si. Shunchaki ma'lumot uchun
-    if message.new_chat_member.first_name:
-        first_name=message.new_chat_member.first_name
+        chat_id = message.chat.id
+        tin=types.InlineKeyboardButton
+        text = str(message.text).decode("utf-8")
+        try:
+            username = message.from_user.username
+        except:
+            username = "None"
+        if bot.get_chat_member(chat_id, user_id).status in ("creator", "administrator"):
+            "admin"
+        else:
+            haqorat=["sikaman","onangni","skaman","xuy","yiban","aminga","oneni","qoto","suka","sikay","ayen","gandon","kutinga","oneyni","enangni","chumo","inahu","kotsan","haromo","yban","сикаман","онангни","скаман","хуй","йибан","аминга","онени","қото","сука","сикай","айен","гандон","кутинга","онейни","энангни","чумо","инаҳу","котсан","ҳаромо","йбан"]
+            for i in haqorat:
+                if i in text.lower():
+                    m=str((datetime.now() + timedelta(hours=5)).strftime('%m'))
+                    try:
+                        if m == "01":
+                            m="yanvar"
+                        if m == "02":
+                            m="fevral"
+                        if m == "03":
+                            m="mart"
+                        if m == "04":
+                            m="aprel"
+                        if m == "05":
+                            m="may"
+                        if m == "06":
+                            m="iyun"
+                        if m == "07":
+                            m="iyul"
+                        if m == "08":
+                            m="avgust"
+                        if m == "09":
+                            m="sentabr"
+                        if m == "10":
+                            m="oktabr"
+                        if m == "11":
+                            m="noyabr"
+                        if m == "12":
+                            m="dekabr"
+                    except:
+                        "except"
+                    day=int((datetime.now() + timedelta(hours=5)).strftime('%d'))+1
+                    year=(datetime.now() + timedelta(hours=5)).strftime('%Y')
+                    v=(datetime.now() + timedelta(hours=5)).strftime('%H:%M')
+                    bot.reply_to(message, '⚠ [{0}](t.me/{1}) *[*`{2}`*] 1* sutkaga "read-only" rejimiga tushirildi.\n*Sabab:* taqiqlangan mavzu ko\'tarildi: _haqorat qildi_\n\n⏰ Cheklov {3}-yilning {4}-{5} kuni soat {6}da olib tashlanadi.'.format(str(first_name), str(username), str(user_id), str(year), str(day), str(m), str(v)), parse_mode="Markdown", disable_web_page_preview=True)
+                    bot.restrict_chat_member(message.chat.id, message.from_user.id, until_date=time()+int(3600*24))
+                    bot.delete_message(chat_id=chat_id, message_id=message.message_id)
+            if "ot?start=" in text.lower():
+                m=str((datetime.now() + timedelta(hours=5)).strftime('%m'))
+                try:
+                    if m == "01":
+                        m="yanvar"
+                    if m == "02":
+                        m="fevral"
+                    if m == "03":
+                        m="mart"
+                    if m == "04":
+                        m="aprel"
+                    if m == "05":
+                        m="may"
+                    if m == "06":
+                        m="iyun"
+                    if m == "07":
+                        m="iyul"
+                    if m == "08":
+                        m="avgust"
+                    if m == "09":
+                        m="sentabr"
+                    if m == "10":
+                        m="oktabr"
+                    if m == "11":
+                        m="noyabr"
+                    if m == "12":
+                        m="dekabr"
+                except:
+                    "except"
+                for tex in text.split(" "):
+                    if "ot?start=" in tex:
+                        day=int((datetime.now() + timedelta(hours=5)).strftime('%d'))+1
+                        year=(datetime.now() + timedelta(hours=5)).strftime('%Y')
+                        v=(datetime.now() + timedelta(hours=5)).strftime('%H:%M')
+                        bot.reply_to(message, '⚠ [{0}](t.me/{1}) *[*`{2}`*] 1* sutkaga "read-only" rejimiga tushirildi.\n*Sabab:* taqiqlangan mavzu ko\'tarildi:  _{7}_\n\n⏰ Cheklov {3}-yilning {4}-{5} kuni soat {6}da olib tashlanadi.'.format(str(first_name), str(username), str(user_id), str(year), str(day), str(m), str(v), str(tex)), parse_mode="Markdown", disable_web_page_preview=True)
+                        bot.restrict_chat_member(message.chat.id, message.from_user.id, until_date=time()+int(3600*24))
+                        bot.delete_message(chat_id=chat_id, message_id=message.message_id)
+            if "t.me" in text.lower() or "joinchat" in text.lower() or "@" in text.lower() or "telegram.me" in text.lower():
+                if bot.get_chat_member(chat_id, user_id).status in ("creator", "administrator"):
+                    "admin_edited"
+                else:
+                    bot.delete_message(chat_id=chat_id, message_id=message.message_id)
+            if message.forward_from:
+                if bot.get_chat_member(chat_id, user_id).status in ("creator", "administrator"):
+                    "admin_edited"
+                else:
+                    bot.delete_message(chat_id=chat_id, message_id=message.message_id)
+            if message.forward_from_chat:
+                if bot.get_chat_member(chat_id, user_id).status in ("creator", "administrator"):
+                    "admin_edited"
+                else:
+                    bot.delete_message(chat_id=chat_id, message_id=message.message_id)
+            elif text == "gid":
+                bot.reply_to(message,str(chat_id))
+            elif message.reply_to_message.text and text.startswith("%") and bot.get_chat_member(chat_id, user_id).status in ("creator", "administrator"):
+                try:
+                    ban=text.replace("%","")
+                    if ban.isdigit():
+                        bot.restrict_chat_member(message.chat.id, message.from_user.id, until_date=time()+int(ban * 3600))
+                        bot.send_message(chat_id,  "Foydalanuvchi {0} soat read-only rejimiga tushirildi".format(str(ban)))
+                except:
+                    bot.send_message(chat_id, "% dan keyin raqam kiriting")
+    except Exception as ex:
+        ex
+
+@bot.message_handler(content_types=['new_chat_members'])
+def send_message(message):
+    matn="📽 Dasturlangan bot yaratishni o'rganish uchun videoni ko'ring https://t.me/apiuz/1031 Tas-ix: https://mover.uz/watch/qXmHNTZm/"
+    if message.chat.username:
+        bot.send_message(message.chat.id, text = 'Salom, {0} {1}! [{2}](https://t.me/{3}) guruhiga xush kelibsiz!'.format(message.new_chat_member.first_name.encode('utf-8'),message.new_chat_member.last_name.encode('utf-8'),message.chat.title.encode('utf-8'),message.chat.username), parse_mode="Markdown", disable_web_page_preview=True)
     else:
-        first_name=message.from_user.first_name
-    #first_name - foydalanuvchi ismi. Shunchaki ma'lumot uchun 
-    username = "None"
-    if message.new_chat_member.username:
-        username = message.new_chat_member.username
-    
-    if not(username.lower().endswith('bot')):
-        bot.send_message(chat_id, "Salom, " + first_name)
+        bot.send_message(message.chat.id, text = 'Salom, {} {}! {} guruhiga xush kelibsiz!'.format(message.new_chat_member.first_name.encode('utf-8'),message.new_chat_member.last_name.encode('utf-8'),message.chat.title.encode('utf-8')), disable_web_page_preview=True)
+
 
 @bot.message_handler(func=lambda message: True)
 def main(message):
@@ -162,7 +266,7 @@ def main(message):
     if len(text)>0: #agar text uzunligi 0 dan kotta bo'sa (hatolarni oldini olish uchun
         try:
             if chat_id>0: #lichka bo'sa
-                step = fv.open('./users/info_' + str(chat_id) + '.uzsdb', 'r').read()
+                step = "main"
             else: #gruppa bo'sa
                 step = "group_chat"
         except:
@@ -171,7 +275,6 @@ def main(message):
         def start():
             if getEnabled(chat_id): #agar oldin yozgan bo'sa
                 bot.send_message(chat_id, "Salom, qalesiz?")
-                next_step(chat_id, 'main')
             else:
                 setEnabled(chat_id)
                 bot.send_message(chat_id, "*Salom, siz bu botga a'zo bo'ldingiz*", parse_mode="Markdown", disable_web_page_preview=True) #so'zni to'g'illavolasila
@@ -179,7 +282,6 @@ def main(message):
                     history = fv.open('./history.uzsdb', 'r').read().split('|')
                 except:
                     history = ["0"]
-                next_step(chat_id, 'main')
                 if history.count(str(chat_id)) == 0:
                     history.append(str(chat_id))
                     fv.open('./history.uzsdb', 'w').write('|'.join(history))
@@ -258,40 +360,144 @@ def main(message):
             
             elif text=="ok":
                 bot.reply_to(message,"ok") #bu tomoni yana example
-            elif text == "/markdown":
-                bot.send_message(chat_id, "*BOLD*, _italic_, `fixedsys`, [giperssilka](https://telegram.me/uzstudio)", parse_mode="Markdown")
-            
-            
-            elif text.startswith("/screen "):
-                text = text.split(" ",1)[1]
-                if text.startswith("http") and not " " in text:
-                    try:
-                        data = urllib2.urlopen("https://screenshotmachine.com/processor.php?urlparam=" + urllib.quote(text)).read()
-                        data = data.replace(data[:(data.find("href='") + len("href='"))],"")
-                        data = data[:data.find("'")]
-                        data = "https://screenshotmachine.com/" + data
-                        try:
-                            bot.send_photo(chat_id, data, caption = '🌐 ' + text, reply_to_message_id = message.message_id)
-                        except:
-                            bot.send_message(chat_id, "[screenshot](" + str(data) + ") topilmadi", parse_mode="Markdown")
-                    except:
-                        _print(" ")
-            
-            
+            elif bot.get_chat_member(chat_id, user_id).status in ("creator", "administrator"):
+                "admin"
             else:
-                if "-" in text or "+" in text or "^" in text or "*" in text or "/" in text or "!" in text or ":" in text or "sin" in text or "cos" in text:
-                    exp = text
+                haqorat=["sikaman","onangni","skaman","xuy","yiban","aminga","oneni","qoto","suka","sikay","ayen","gandon","kutinga","oneyni","enangni","chumo","inahu","kotsan","haromo","yban","сикаман","онангни","скаман","хуй","йибан","аминга","онени","қото","сука","сикай","айен","гандон","кутинга","онейни","энангни","чумо","инаҳу","котсан","ҳаромо","йбан"]
+                try:
+                    username = message.from_user.username
+                except:
+                    username = "None"
+                for i in haqorat:
+                    if i in text.lower():
+                        m=str((datetime.now() + timedelta(hours=5)).strftime('%m'))
+                        try:
+                            if m == "01":
+                                m="yanvar"
+                            if m == "02":
+                                m="fevral"
+                            if m == "03":
+                                m="mart"
+                            if m == "04":
+                                m="aprel"
+                            if m == "05":
+                                m="may"
+                            if m == "06":
+                                m="iyun"
+                            if m == "07":
+                                m="iyul"
+                            if m == "08":
+                                m="avgust"
+                            if m == "09":
+                                m="sentabr"
+                            if m == "10":
+                                m="oktabr"
+                            if m == "11":
+                                m="noyabr"
+                            if m == "12":
+                                m="dekabr"
+                        except:
+                            "except"
+                        day=int((datetime.now() + timedelta(hours=5)).strftime('%d'))+1
+                        year=(datetime.now() + timedelta(hours=5)).strftime('%Y')
+                        v=(datetime.now() + timedelta(hours=5)).strftime('%H:%M')
+                        bot.reply_to(message, '⚠ [{0}](t.me/{1}) *[*`{2}`*] 1* sutkaga "read-only" rejimiga tushirildi.\n*Sabab:* taqiqlangan mavzu ko\'tarildi: _haqorat qildi_\n\n⏰ Cheklov {3}-yilning {4}-{5} kuni soat {6}da olib tashlanadi.'.format(str(first_name), str(username), str(user_id), str(year), str(day), str(m), str(v)), parse_mode="Markdown", disable_web_page_preview=True)
+                        bot.restrict_chat_member(message.chat.id, message.from_user.id, until_date=time()+int(3600*24))
+                        bot.delete_message(chat_id=chat_id, message_id=message.message_id)
+                if "ot?start=" in text.lower():
+                    m=str((datetime.now() + timedelta(hours=5)).strftime('%m'))
                     try:
-                        data = urllib2.urlopen("http://api.mathjs.org/v1/?expr=" + urllib.quote(exp)).read()
-                        bot.send_message(chat_id, str(data))
-                    except Exception as ex:
-                        logging.info(ex)
-                
-                if len(text)<20:
-                    answer = get_answer(text)
-                    if answer:
-                        bot.send_message(chat_id, answer.replace('__name__', first_name).replace('__id__', str(message.from_user.id)), reply_to_message_id = message.message_id)
-                    
+                        if m == "01":
+                            m="yanvar"
+                        if m == "02":
+                            m="fevral"
+                        if m == "03":
+                            m="mart"
+                        if m == "04":
+                            m="aprel"
+                        if m == "05":
+                            m="may"
+                        if m == "06":
+                            m="iyun"
+                        if m == "07":
+                            m="iyul"
+                        if m == "08":
+                            m="avgust"
+                        if m == "09":
+                            m="sentabr"
+                        if m == "10":
+                            m="oktabr"
+                        if m == "11":
+                            m="noyabr"
+                        if m == "12":
+                            m="dekabr"
+                    except:
+                        "except"
+                    for tex in text.split(" "):
+                        if "ot?start=" in tex:
+                            day=int((datetime.now() + timedelta(hours=5)).strftime('%d'))+1
+                            year=(datetime.now() + timedelta(hours=5)).strftime('%Y')
+                            v=(datetime.now() + timedelta(hours=5)).strftime('%H:%M')
+                            bot.reply_to(message, '⚠ [{0}](t.me/{1}) *[*`{2}`*] 1* sutkaga "read-only" rejimiga tushirildi.\n*Sabab:* taqiqlangan mavzu ko\'tarildi:  _{7}_\n\n⏰ Cheklov {3}-yilning {4}-{5} kuni soat {6}da olib tashlanadi.'.format(str(first_name), str(username), str(user_id), str(year), str(day), str(m), str(v), str(tex)), parse_mode="Markdown", disable_web_page_preview=True)
+                            bot.restrict_chat_member(message.chat.id, message.from_user.id, until_date=time()+int(3600*24))
+                            bot.delete_message(chat_id=chat_id, message_id=message.message_id)
+                if "t.me" in text.lower() or "joinchat" in text.lower() or "@" in text.lower() or "telegram.me" in text.lower():
+                    if bot.get_chat_member(chat_id, user_id).status in ("creator", "administrator"):
+                        "admin_edited"
+                    else:
+                        bot.delete_message(chat_id=chat_id, message_id=message.message_id)
+                if message.forward_from:
+                    if bot.get_chat_member(chat_id, user_id).status in ("creator", "administrator"):
+                        "admin_edited"
+                    else:
+                        bot.delete_message(chat_id=chat_id, message_id=message.message_id)
+                if message.forward_from_chat:
+                    if bot.get_chat_member(chat_id, user_id).status in ("creator", "administrator"):
+                        "admin_edited"
+                    else:
+                        bot.delete_message(chat_id=chat_id, message_id=message.message_id)
+                elif text == "gid":
+                    bot.reply_to(message,str(chat_id))
+                elif message.reply_to_message.text and text.startswith("%") and bot.get_chat_member(chat_id, user_id).status in ("creator", "administrator"):
+                    try:
+                        ban=text.replace("%","")
+                        if ban.isdigit():
+                            bot.restrict_chat_member(message.chat.id, message.from_user.id, until_date=time()+int(ban * 3600))
+                            bot.send_message(chat_id,  "Foydalanuvchi {0} soat read-only rejimiga tushirildi".format(str(ban)))
+                    except:
+                        bot.send_message(chat_id, "% dan keyin raqam kiriting")
+          
+            
+                elif text.startswith("/screen "):
+                    text = text.split(" ",1)[1]
+                    if text.startswith("http") and not " " in text:
+                        try:
+                            data = urllib2.urlopen("https://screenshotmachine.com/processor.php?urlparam=" + urllib.quote(text)).read()
+                            data = data.replace(data[:(data.find("href='") + len("href='"))],"")
+                            data = data[:data.find("'")]
+                            data = "https://screenshotmachine.com/" + data
+                            try:
+                                bot.send_photo(chat_id, data, caption = '🌐 ' + text, reply_to_message_id = message.message_id)
+                            except:
+                                bot.send_message(chat_id, "[screenshot](" + str(data) + ") topilmadi", parse_mode="Markdown")
+                        except:
+                            _print(" ")
+
+
+                else:
+                    if "-" in text or "+" in text or "^" in text or "*" in text or "/" in text or "!" in text or ":" in text or "sin" in text or "cos" in text:
+                        exp = text
+                        try:
+                            data = urllib2.urlopen("http://api.mathjs.org/v1/?expr=" + urllib.quote(exp)).read()
+                            bot.send_message(chat_id, str(data))
+                        except Exception as ex:
+                            logging.info(ex)
+
+                    if len(text)<20:
+                        answer = get_answer(text)
+                        if answer:
+                            bot.send_message(chat_id, answer.replace('__name__', first_name).replace('__id__', str(message.from_user.id)), reply_to_message_id = message.message_id)
+
 
         elif step=="none":
             start()
@@ -386,6 +592,7 @@ class IndexHandler(webapp2.RequestHandler):
 # Process webhook calls
 class WebhookHandler(webapp2.RequestHandler):
     def post(self):
+        urlfetch.set_default_fetch_deadline(600)
         body = json.loads(self.request.body)
         logging.info('request body:')
         logging.info(body)
@@ -436,6 +643,7 @@ class WebhookHandler(webapp2.RequestHandler):
 
 class SetWebhookHandler(webapp2.RequestHandler):
     def get(self):
+        urlfetch.set_default_fetch_deadline(60)
         url = self.request.get("url")
         token = self.request.get("token")
         try:
