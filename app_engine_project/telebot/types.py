@@ -19,7 +19,6 @@ class JsonSerializable:
     def to_json(self):
         """
         Returns a JSON string representation of this class.
-
         This function must be overridden by subclasses.
         :return: a JSON formatted string.
         """
@@ -35,7 +34,6 @@ class Dictionaryable:
     def to_dic(self):
         """
         Returns a JSON string representation of this class.
-
         This function must be overridden by subclasses.
         :return: a JSON formatted string.
         """
@@ -52,7 +50,6 @@ class JsonDeserializable:
     def de_json(cls, json_type):
         """
         Returns an instance of this class from the given json dict or string.
-
         This function must be overridden by subclasses.
         :return: an instance of this class created from the given json dict or string.
         """
@@ -101,6 +98,8 @@ class Update(JsonDeserializable):
         inline_query = None
         chosen_inline_result = None
         callback_query = None
+        shipping_query = None
+        pre_checkout_query = None
         if 'message' in obj:
             message = Message.de_json(obj['message'])
         if 'edited_message' in obj:
@@ -115,11 +114,15 @@ class Update(JsonDeserializable):
             chosen_inline_result = ChosenInlineResult.de_json(obj['chosen_inline_result'])
         if 'callback_query' in obj:
             callback_query = CallbackQuery.de_json(obj['callback_query'])
+        if 'shipping_query' in obj:
+            shipping_query = ShippingQuery.de_json(obj['shipping_query'])
+        if 'pre_checkout_query' in obj:
+            pre_checkout_query = PreCheckoutQuery.de_json(obj['pre_checkout_query'])
         return cls(update_id, message, edited_message, channel_post, edited_channel_post, inline_query,
-                   chosen_inline_result, callback_query)
+                   chosen_inline_result, callback_query, shipping_query, pre_checkout_query)
 
     def __init__(self, update_id, message, edited_message, channel_post, edited_channel_post, inline_query,
-                 chosen_inline_result, callback_query):
+                 chosen_inline_result, callback_query, shipping_query, pre_checkout_query):
         self.update_id = update_id
         self.edited_message = edited_message
         self.message = message
@@ -129,6 +132,8 @@ class Update(JsonDeserializable):
         self.inline_query = inline_query
         self.chosen_inline_result = chosen_inline_result
         self.callback_query = callback_query
+        self.shipping_query = shipping_query
+        self.pre_checkout_query = pre_checkout_query
 
 
 class WebhookInfo(JsonDeserializable):
@@ -140,6 +145,8 @@ class WebhookInfo(JsonDeserializable):
         pending_update_count = obj['pending_update_count']
         last_error_date = None
         last_error_message = None
+        max_connections = None
+        allowed_updates = None
         if 'last_error_message' in obj:
             last_error_date = obj['last_error_date']
         if 'last_error_message' in obj:
@@ -148,9 +155,11 @@ class WebhookInfo(JsonDeserializable):
             max_connections = obj['max_connections']
         if 'allowed_updates' in obj:
             allowed_updates = obj['allowed_updates']
-        return cls(url, has_custom_certificate, pending_update_count, last_error_date, last_error_message, max_connections, allowed_updates)
+        return cls(url, has_custom_certificate, pending_update_count, last_error_date, last_error_message,
+                   max_connections, allowed_updates)
 
-    def __init__(self, url, has_custom_certificate, pending_update_count, last_error_date, last_error_message, max_connections, allowed_updates):
+    def __init__(self, url, has_custom_certificate, pending_update_count, last_error_date, last_error_message,
+                 max_connections, allowed_updates):
         self.url = url
         self.has_custom_certificate = has_custom_certificate
         self.pending_update_count = pending_update_count
@@ -168,13 +177,15 @@ class User(JsonDeserializable):
         first_name = obj['first_name']
         last_name = obj.get('last_name')
         username = obj.get('username')
-        return cls(id, first_name, last_name, username)
+        language_code = obj.get('language_code')
+        return cls(id, first_name, last_name, username, language_code)
 
-    def __init__(self, id, first_name, last_name=None, username=None):
+    def __init__(self, id, first_name, last_name=None, username=None, language_code=None):
         self.id = id
         self.first_name = first_name
         self.username = username
         self.last_name = last_name
+        self.language_code = language_code
 
 
 class GroupChat(JsonDeserializable):
@@ -201,10 +212,16 @@ class Chat(JsonDeserializable):
         first_name = obj.get('first_name')
         last_name = obj.get('last_name')
         all_members_are_administrators = obj.get('all_members_are_administrators')
-        return cls(id, type, title, username, first_name, last_name, all_members_are_administrators)
+        photo = None
+        if 'photo' in obj:
+            photo = ChatPhoto.de_json(obj['photo'])
+        description = obj.get('description')
+        invite_link = obj.get('invite_link')
+        return cls(id, type, title, username, first_name, last_name, all_members_are_administrators,
+                   photo, description, invite_link)
 
     def __init__(self, id, type, title=None, username=None, first_name=None, last_name=None,
-                 all_members_are_administrators=None):
+                 all_members_are_administrators=None, photo=None, description=None, invite_link=None):
         self.type = type
         self.last_name = last_name
         self.first_name = first_name
@@ -212,6 +229,9 @@ class Chat(JsonDeserializable):
         self.id = id
         self.title = title
         self.all_members_are_administrators = all_members_are_administrators
+        self.photo = photo
+        self.description = description
+        self.invite_link = invite_link
 
 
 class Message(JsonDeserializable):
@@ -261,6 +281,9 @@ class Message(JsonDeserializable):
         if 'video' in obj:
             opts['video'] = Video.de_json(obj['video'])
             content_type = 'video'
+        if 'video_note' in obj:
+            opts['video_note'] = VideoNote.de_json(obj['video_note'])
+            content_type = 'video_note'
         if 'voice' in obj:
             opts['voice'] = Audio.de_json(obj['voice'])
             content_type = 'voice'
@@ -278,6 +301,13 @@ class Message(JsonDeserializable):
         if 'new_chat_member' in obj:
             opts['new_chat_member'] = User.de_json(obj['new_chat_member'])
             content_type = 'new_chat_member'
+        if 'new_chat_members' in obj:
+            chat_members = obj['new_chat_members']
+            nms = []
+            for m in chat_members:
+                nms.append(User.de_json(m))
+            opts['new_chat_members'] = nms
+            content_type = 'new_chat_members'
         if 'left_chat_member' in obj:
             opts['left_chat_member'] = User.de_json(obj['left_chat_member'])
             content_type = 'left_chat_member'
@@ -299,6 +329,12 @@ class Message(JsonDeserializable):
             opts['migrate_from_chat_id'] = obj['migrate_from_chat_id']
         if 'pinned_message' in obj:
             opts['pinned_message'] = Message.de_json(obj['pinned_message'])
+        if 'invoice' in obj:
+            opts['invoice'] = Invoice.de_json(obj['invoice'])
+            content_type = 'invoice'
+        if 'successful_payment' in obj:
+            opts['successful_payment'] = SuccessfulPayment.de_json(obj['successful_payment'])
+            content_type = 'successful_payment'
         return cls(message_id, from_user, date, chat, content_type, opts)
 
     @classmethod
@@ -340,12 +376,14 @@ class Message(JsonDeserializable):
         self.photo = None
         self.sticker = None
         self.video = None
+        self.video_note = None
         self.voice = None
         self.caption = None
         self.contact = None
         self.location = None
         self.venue = None
         self.new_chat_member = None
+        self.new_chat_members = None
         self.left_chat_member = None
         self.new_chat_title = None
         self.new_chat_photo = None
@@ -356,6 +394,8 @@ class Message(JsonDeserializable):
         self.migrate_to_chat_id = None
         self.migrate_from_chat_id = None
         self.pinned_message = None
+        self.invoice = None
+        self.successful_payment = None
         for key in options:
             setattr(self, key, options[key])
 
@@ -502,6 +542,27 @@ class Video(JsonDeserializable):
         self.duration = duration
         self.thumb = thumb
         self.mime_type = mime_type
+        self.file_size = file_size
+
+
+class VideoNote(JsonDeserializable):
+    @classmethod
+    def de_json(cls, json_string):
+        obj = cls.check_json(json_string)
+        file_id = obj['file_id']
+        length = obj['length']
+        duration = obj['duration']
+        thumb = None
+        if 'thumb' in obj:
+            thumb = PhotoSize.de_json(obj['thumb'])
+        file_size = obj.get('file_size')
+        return cls(file_id, length, duration, thumb, file_size)
+
+    def __init__(self, file_id, length, duration, thumb=None, file_size=None):
+        self.file_id = file_id
+        self.length = length
+        self.duration = duration
+        self.thumb = thumb
         self.file_size = file_size
 
 
@@ -746,13 +807,14 @@ class InlineKeyboardMarkup(Dictionaryable, JsonSerializable):
 
 class InlineKeyboardButton(JsonSerializable):
     def __init__(self, text, url=None, callback_data=None, switch_inline_query=None,
-                 switch_inline_query_current_chat=None, callback_game=None):
+                 switch_inline_query_current_chat=None, callback_game=None, pay=None):
         self.text = text
         self.url = url
         self.callback_data = callback_data
         self.switch_inline_query = switch_inline_query
         self.switch_inline_query_current_chat = switch_inline_query_current_chat
         self.callback_game = callback_game
+        self.pay = pay
 
     def to_json(self):
         return json.dumps(self.to_dic())
@@ -769,6 +831,8 @@ class InlineKeyboardButton(JsonSerializable):
             json_dic['switch_inline_query_current_chat'] = self.switch_inline_query_current_chat
         if self.callback_game is not None:
             json_dic['callback_game'] = self.callback_game
+        if self.pay is not None:
+            json_dic['pay'] = self.pay
         return json_dic
 
 
@@ -797,17 +861,62 @@ class CallbackQuery(JsonDeserializable):
         self.inline_message_id = inline_message_id
 
 
+class ChatPhoto(JsonDeserializable):
+    @classmethod
+    def de_json(cls, json_type):
+        obj = cls.check_json(json_type)
+        small_file_id = obj['small_file_id']
+        big_file_id = obj['big_file_id']
+        return cls(small_file_id, big_file_id)
+
+    def __init__(self, small_file_id, big_file_id):
+        self.small_file_id = small_file_id
+        self.big_file_id = big_file_id
+
+
 class ChatMember(JsonDeserializable):
     @classmethod
     def de_json(cls, json_type):
         obj = cls.check_json(json_type)
         user = User.de_json(obj['user'])
         status = obj['status']
-        return cls(user, status)
+        until_date = obj.get('until_date')
+        can_be_edited = obj.get('can_be_edited')
+        can_change_info = obj.get('can_change_info')
+        can_post_messages = obj.get('can_post_messages')
+        can_edit_messages = obj.get('can_edit_messages')
+        can_delete_messages = obj.get('can_delete_messages')
+        can_invite_users = obj.get('can_invite_users')
+        can_restrict_members = obj.get('can_restrict_members')
+        can_pin_messages = obj.get('can_pin_messages')
+        can_promote_members = obj.get('can_promote_members')
+        can_send_messages = obj.get('can_send_messages')
+        can_send_media_messages = obj.get('can_send_media_messages')
+        can_send_other_messages = obj.get('can_send_other_messages')
+        can_add_web_page_previews = obj.get('can_add_web_page_previews')
+        return cls(user, status, until_date, can_be_edited, can_change_info, can_post_messages, can_edit_messages,
+                   can_delete_messages, can_invite_users, can_restrict_members, can_pin_messages, can_promote_members,
+                   can_send_messages, can_send_media_messages, can_send_other_messages, can_add_web_page_previews)
 
-    def __init__(self, user, status):
+    def __init__(self, user, status, until_date, can_be_edited, can_change_info, can_post_messages, can_edit_messages,
+                 can_delete_messages, can_invite_users, can_restrict_members, can_pin_messages, can_promote_members,
+                 can_send_messages, can_send_media_messages, can_send_other_messages, can_add_web_page_previews):
         self.user = user
         self.status = status
+        self.until_date = until_date
+        self.can_be_edited = can_be_edited
+        self.can_change_info = can_change_info
+        self.can_post_messages = can_post_messages
+        self.can_edit_messages = can_edit_messages
+        self.can_delete_messages = can_delete_messages
+        self.can_invite_users = can_invite_users
+        self.can_restrict_members = can_restrict_members
+        self.can_pin_messages = can_pin_messages
+        self.can_promote_members = can_promote_members
+        self.can_send_messages = can_send_messages
+        self.can_send_media_messages = can_send_media_messages
+        self.can_send_other_messages = can_send_other_messages
+        self.can_add_web_page_previews = can_add_web_page_previews
 
 
 # InlineQuery
@@ -1026,7 +1135,7 @@ class InlineQueryResultPhoto(JsonSerializable):
 
 class InlineQueryResultGif(JsonSerializable):
     def __init__(self, id, gif_url, thumb_url, gif_width=None, gif_height=None, title=None, caption=None,
-                 reply_markup=None, input_message_content=None):
+                 reply_markup=None, input_message_content=None, gif_duration=None):
         """
         Represents a link to an animated GIF file.
         :param id: Unique identifier for this result, 1-64 bytes.
@@ -1050,6 +1159,7 @@ class InlineQueryResultGif(JsonSerializable):
         self.caption = caption
         self.reply_markup = reply_markup
         self.input_message_content = input_message_content
+        self.gif_duration = gif_duration
 
     def to_json(self):
         json_dict = {'type': self.type, 'id': self.id, 'gif_url': self.gif_url, 'thumb_url': self.thumb_url}
@@ -1065,12 +1175,14 @@ class InlineQueryResultGif(JsonSerializable):
             json_dict['reply_markup'] = self.reply_markup.to_dic()
         if self.input_message_content:
             json_dict['input_message_content'] = self.input_message_content.to_dic()
+        if self.gif_duration:
+            json_dict['gif_duration'] = self.gif_duration
         return json.dumps(json_dict)
 
 
 class InlineQueryResultMpeg4Gif(JsonSerializable):
     def __init__(self, id, mpeg4_url, thumb_url, mpeg4_width=None, mpeg4_height=None, title=None, caption=None,
-                 reply_markup=None, input_message_content=None):
+                 reply_markup=None, input_message_content=None, mpeg4_duration=None):
         """
         Represents a link to a video animation (H.264/MPEG-4 AVC video without sound).
         :param id: Unique identifier for this result, 1-64 bytes
@@ -1094,6 +1206,7 @@ class InlineQueryResultMpeg4Gif(JsonSerializable):
         self.caption = caption
         self.reply_markup = reply_markup
         self.input_message_content = input_message_content
+        self.mpeg4_duration = mpeg4_duration
 
     def to_json(self):
         json_dict = {'type': self.type, 'id': self.id, 'mpeg4_url': self.mpeg4_url, 'thumb_url': self.thumb_url}
@@ -1109,6 +1222,8 @@ class InlineQueryResultMpeg4Gif(JsonSerializable):
             json_dict['reply_markup'] = self.reply_markup.to_dic()
         if self.input_message_content:
             json_dict['input_message_content'] = self.input_message_content.to_dic()
+        if self.mpeg4_duration:
+            json_dict['mpeg4_duration '] = self.mpeg4_duration
         return json.dumps(json_dict)
 
 
@@ -1578,3 +1693,240 @@ class GameHighScore(JsonDeserializable):
         self.position = position
         self.user = user
         self.score = score
+
+
+# Payments
+
+class LabeledPrice(JsonSerializable):
+    def __init__(self, label, amount):
+        self.label = label
+        self.amount = amount
+
+    def to_json(self):
+        return json.dumps(self.to_dic())
+
+    def to_dic(self):
+        return {'label': self.label, 'amount': self.amount}
+
+
+class Invoice(JsonDeserializable):
+    @classmethod
+    def de_json(cls, json_string):
+        obj = cls.check_json(json_string)
+        title = obj['title']
+        description = obj['description']
+        start_parameter = obj['start_parameter']
+        currency = obj['currency']
+        total_amount = obj['total_amount']
+        return cls(title, description, start_parameter, currency, total_amount)
+
+    def __init__(self, title, description, start_parameter, currency, total_amount):
+        self.title = title
+        self.description = description
+        self.start_parameter = start_parameter
+        self.currency = currency
+        self.total_amount = total_amount
+
+
+class ShippingAddress(JsonDeserializable):
+    @classmethod
+    def de_json(cls, json_string):
+        obj = cls.check_json(json_string)
+        country_code = obj['country_code']
+        state = obj['state']
+        city = obj['city']
+        street_line1 = obj['street_line1']
+        street_line2 = obj['street_line2']
+        post_code = obj['post_code']
+        return cls(country_code, state, city, street_line1, street_line2, post_code)
+
+    def __init__(self, country_code, state, city, street_line1, street_line2, post_code):
+        self.country_code = country_code
+        self.state = state
+        self.city = city
+        self.street_line1 = street_line1
+        self.street_line2 = street_line2
+        self.post_code = post_code
+
+
+class OrderInfo(JsonDeserializable):
+    @classmethod
+    def de_json(cls, json_string):
+        obj = cls.check_json(json_string)
+        name = obj.get('name')
+        phone_number = obj.get('phone_number')
+        email = obj.get('email')
+        shipping_address = None
+        if 'shipping_address' in obj:
+            shipping_address = ShippingAddress.de_json(obj['shipping_address'])
+        return cls(name, phone_number, email, shipping_address)
+
+    def __init__(self, name, phone_number, email, shipping_address):
+        self.name = name
+        self.phone_number = phone_number
+        self.email = email
+        self.shipping_address = shipping_address
+
+
+class ShippingOption(JsonSerializable):
+    def __init__(self, id, title):
+        self.id = id
+        self.title = title
+        self.prices = []
+
+    def add_price(self, *args):
+        """
+        Add LabeledPrice to ShippingOption
+        :param args: LabeledPrices 
+        """
+        for price in args:
+            self.prices.append(price)
+
+    def to_json(self):
+        price_list = []
+        for p in self.prices:
+            price_list.append(p.to_dic())
+        json_dict = {'id': self.id, 'title': self.title, 'prices': price_list}
+        return json_dict
+
+
+class SuccessfulPayment(JsonDeserializable):
+    @classmethod
+    def de_json(cls, json_string):
+        obj = cls.check_json(json_string)
+        currency = obj['currency']
+        total_amount = obj['total_amount']
+        invoice_payload = obj['invoice_payload']
+        shipping_option_id = obj.get('shipping_option_id')
+        order_info = None
+        if 'order_info' in obj:
+            order_info = OrderInfo.de_json(obj['order_info'])
+        telegram_payment_charge_id = obj['telegram_payment_charge_id']
+        provider_payment_charge_id = obj['provider_payment_charge_id']
+        return cls(currency, total_amount, invoice_payload, shipping_option_id, order_info,
+                   telegram_payment_charge_id, provider_payment_charge_id)
+
+    def __init__(self, currency, total_amount, invoice_payload, shipping_option_id, order_info,
+                 telegram_payment_charge_id, provider_payment_charge_id):
+        self.currency = currency
+        self.total_amount = total_amount
+        self.invoice_payload = invoice_payload
+        self.shipping_option_id = shipping_option_id
+        self.order_info = order_info
+        self.telegram_payment_charge_id = telegram_payment_charge_id
+        self.provider_payment_charge_id = provider_payment_charge_id
+
+
+class ShippingQuery(JsonDeserializable):
+    @classmethod
+    def de_json(cls, json_string):
+        obj = cls.check_json(json_string)
+        id = obj['id']
+        from_user = User.de_json(obj['from'])
+        invoice_payload = obj['invoice_payload']
+        shipping_address = ShippingAddress.de_json(obj['shipping_address'])
+        return cls(id, from_user, invoice_payload, shipping_address)
+
+    def __init__(self, id, from_user, invoice_payload, shipping_address):
+        self.id = id
+        self.from_user = from_user
+        self.invoice_payload = invoice_payload
+        self.shipping_address = shipping_address
+
+
+class PreCheckoutQuery(JsonDeserializable):
+    @classmethod
+    def de_json(cls, json_string):
+        obj = cls.check_json(json_string)
+        id = obj['id']
+        from_user = User.de_json(obj['from'])
+        currency = obj['currency']
+        total_amount = obj['total_amount']
+        invoice_payload = obj['invoice_payload']
+        shipping_option_id = obj.get('shipping_option_id')
+        order_info = None
+        if 'order_info' in obj:
+            order_info = OrderInfo.de_json(obj['order_info'])
+        return cls(id, from_user, currency, total_amount, invoice_payload, shipping_option_id, order_info)
+
+    def __init__(self, id, from_user, currency, total_amount, invoice_payload, shipping_option_id, order_info):
+        self.id = id
+        self.from_user = from_user
+        self.currency = currency
+        self.total_amount = total_amount
+        self.invoice_payload = invoice_payload
+        self.shipping_option_id = shipping_option_id
+        self.order_info = order_info
+
+
+# Stickers
+
+class StickerSet(JsonDeserializable):
+    @classmethod
+    def de_json(cls, json_string):
+        obj = cls.check_json(json_string)
+        name = obj['name']
+        title = obj['title']
+        contains_masks = obj['contains_masks']
+        stickers = []
+        for s in obj['stickers']:
+            stickers.append(Sticker.de_json(s))
+        return cls(name, title, contains_masks, stickers)
+
+    def __init__(self, name, title, contains_masks, stickers):
+        self.stickers = stickers
+        self.contains_masks = contains_masks
+        self.title = title
+        self.name = name
+
+
+class Sticker(JsonDeserializable):
+    @classmethod
+    def de_json(cls, json_string):
+        obj = cls.check_json(json_string)
+        file_id = obj['file_id']
+        width = obj['width']
+        height = obj['height']
+        thumb = None
+        if 'thumb' in obj:
+            thumb = PhotoSize.de_json(obj['thumb'])
+        emoji = obj.get('emoji')
+        set_name = obj.get('set_name')
+        mask_position = None
+        if 'mask_position' in obj:
+            mask_position = MaskPosition.de_json(obj['mask_position'])
+        file_size = obj.get('file_size')
+        return cls(file_id, width, height, thumb, emoji, set_name, mask_position, file_size)
+
+    def __init__(self, file_id, width, height, thumb, emoji, set_name, mask_position, file_size):
+        self.file_id = file_id
+        self.width = width
+        self.height = height
+        self.thumb = thumb
+        self.emoji = emoji
+        self.set_name = set_name
+        self.mask_position = mask_position
+        self.file_size = file_size
+
+
+class MaskPosition(JsonDeserializable, JsonSerializable):
+    @classmethod
+    def de_json(cls, json_string):
+        obj = cls.check_json(json_string)
+        point = obj['point']
+        x_shift = obj['x_shift']
+        y_shift = obj['y_shift']
+        scale = obj['scale']
+        return cls(point, x_shift, y_shift, scale)
+
+    def __init__(self, point, x_shift, y_shift, scale):
+        self.point = point
+        self.x_shift = x_shift
+        self.y_shift = y_shift
+        self.scale = scale
+
+    def to_json(self):
+        return json.dumps(self.to_dic())
+
+    def to_dic(self):
+        return {'point': self.point, 'x_shift': self.x_shift, 'y_shift': self.y_shift, 'scale': self.scale}

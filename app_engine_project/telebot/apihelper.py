@@ -395,6 +395,94 @@ def unban_chat_member(token, chat_id, user_id):
     payload = {'chat_id': chat_id, 'user_id': user_id}
     return _make_request(token, method_url, params=payload, method='post')
 
+def restrict_chat_member(token, chat_id, user_id, until_date=None, can_send_messages=None,
+                         can_send_media_messages=None, can_send_other_messages=None,
+                         can_add_web_page_previews=None):
+    method_url = 'restrictChatMember'
+    payload = {'chat_id': chat_id, 'user_id': user_id}
+    if until_date:
+        payload['until_date'] = until_date
+    if can_send_messages:
+        payload['can_send_messages'] = can_send_messages
+    if can_send_media_messages:
+        payload['can_send_media_messages'] = can_send_media_messages
+    if can_send_other_messages:
+        payload['can_send_other_messages'] = can_send_other_messages
+    if can_add_web_page_previews:
+        payload['can_add_web_page_previews'] = can_add_web_page_previews
+
+    return _make_request(token, method_url, params=payload, method='post')
+
+
+def promote_chat_member(token, chat_id, user_id, can_change_info=None, can_post_messages=None,
+                        can_edit_messages=None, can_delete_messages=None, can_invite_users=None,
+                        can_restrict_members=None, can_pin_messages=None, can_promote_members=None):
+    method_url = 'promoteChatMember'
+    payload = {'chat_id': chat_id, 'user_id': user_id}
+    if can_change_info:
+        payload['can_change_info'] = can_change_info
+    if can_post_messages:
+        payload['can_post_messages'] = can_post_messages
+    if can_edit_messages:
+        payload['can_edit_messages'] = can_edit_messages
+    if can_delete_messages:
+        payload['can_delete_messages'] = can_delete_messages
+    if can_invite_users:
+        payload['can_invite_users'] = can_invite_users
+    if can_restrict_members:
+        payload['can_restrict_members'] = can_restrict_members
+    if can_pin_messages:
+        payload['can_pin_messages'] = can_pin_messages
+    if can_promote_members:
+        payload['can_promote_members'] = can_promote_members
+    return _make_request(token, method_url, params=payload, method='post')
+
+
+def export_chat_invite_link(token, chat_id):
+    method_url = 'exportChatInviteLink'
+    payload = {'chat_id': chat_id}
+    return _make_request(token, method_url, params=payload, method='post')
+
+
+def set_chat_photo(token, chat_id, photo):
+    method_url = 'setChatPhoto'
+    payload = {'chat_id': chat_id}
+    files = None
+    if not util.is_string(photo):
+        files = {'photo': photo}
+    else:
+        payload['photo'] = photo
+    return _make_request(token, method_url, params=payload, files=files, method='post')
+
+
+def delete_chat_photo(token, chat_id):
+    method_url = 'deleteChatPhoto'
+    payload = {'chat_id': chat_id}
+    return _make_request(token, method_url, params=payload, method='post')
+
+
+def set_chat_title(token, chat_id, title):
+    method_url = 'setChatTitle'
+    payload = {'chat_id': chat_id, 'title': title}
+    return _make_request(token, method_url, params=payload, method='post')
+
+
+def set_chat_description(token, chat_id, description):
+    method_url = 'setChatDescription'
+    payload = {'chat_id': chat_id, 'description': description}
+    return _make_request(token, method_url, params=payload, method='post')
+
+
+def pin_chat_message(token, chat_id, message_id, disable_notification=False):
+    method_url = 'pinChatMessage'
+    payload = {'chat_id': chat_id, 'message_id': message_id, 'disable_notification': disable_notification}
+    return _make_request(token, method_url, params=payload, method='post')
+
+
+def unpin_chat_message(token, chat_id):
+    method_url = 'unpinChatMessage'
+    payload = {'chat_id': chat_id}
+    return _make_request(token, method_url, params=payload, method='post')
 
 # Updating messages
 
@@ -442,6 +530,11 @@ def edit_message_reply_markup(token, chat_id=None, message_id=None, inline_messa
         payload['inline_message_id'] = inline_message_id
     if reply_markup:
         payload['reply_markup'] = _convert_markup(reply_markup)
+    return _make_request(token, method_url, params=payload)
+
+def delete_message(token, chat_id, message_id):
+    method_url = r'deleteMessage'
+    payload = {'chat_id': chat_id, 'message_id': message_id}
     return _make_request(token, method_url, params=payload)
 
 

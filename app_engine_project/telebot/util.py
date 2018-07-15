@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import threading
+import traceback
 import re
 import sys
 import six
@@ -14,6 +15,9 @@ except ImportError:
     import queue as Queue
 
 from telebot import logger
+
+
+thread_local = threading.local()
 
 
 class WorkerThread(threading.Thread):
@@ -56,8 +60,8 @@ class WorkerThread(threading.Thread):
                     self.done_event.set()
                 except Queue.Empty:
                     pass
-                except:
-                    logger.debug("Exception occurred")
+                except Exception as e:
+                    logger.error(type(e).__name__ + " occurred, args=" + str(e.args) + "\n" + traceback.format_exc())
                     self.exc_info = sys.exc_info()
                     self.exception_event.set()
 
@@ -164,13 +168,11 @@ def extract_command(text):
     """
     Extracts the command from `text` (minus the '/') if `text` is a command (see is_command).
     If `text` is not a command, this function returns None.
-
     Examples:
     extract_command('/help'): 'help'
     extract_command('/help@BotName'): 'help'
     extract_command('/search black eyed peas'): 'search'
     extract_command('Good day to you'): None
-
     :param text: String to extract the command from
     :return: the command if `text` is a command (according to is_command), else None.
     """
@@ -181,7 +183,6 @@ def split_string(text, chars_per_string):
     """
     Splits one string into multiple strings, with a maximum amount of `chars_per_string` characters per string.
     This is very useful for splitting one giant message into multiples.
-
     :param text: The text to split
     :param chars_per_string: The number of characters per line the text is split into.
     :return: The splitted text as a list of strings.
@@ -241,3 +242,12 @@ def extract_arguments(text):
     regexp = re.compile("\/\w*(@\w*)*\s*([\s\S]*)",re.IGNORECASE)
     result = regexp.match(text)
     return result.group(2) if is_command(text) else None
+
+
+def per_thread(key, construct_value):
+    try:
+        return getattr(thread_local, key)
+    except AttributeError:
+        value = construct_value()
+        setattr(thread_local, key, value)
+        return value
