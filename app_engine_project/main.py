@@ -13,7 +13,7 @@ import json
 from google.appengine.ext import ndb
 from google.appengine.api import urlfetch
 import time
-from time import sleep *
+from time import *
 from datetime import datetime, timedelta
 import telebot
 from telebot import types
