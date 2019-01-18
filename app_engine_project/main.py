@@ -100,7 +100,6 @@ def main(message):
     user_id = message.from_user.id #hat yozgan odam id si
     chat_id = message.chat.id #chat id si. Agar gruppa bo'sa chat_id<0, agar lichka bo'sa user_id bilan bir xil
     text = str(message.text).decode("utf-8") #yozilfan gat matni
-    fv.open('./description.txt', 'w').write('\n')
     if len(text)>0: #agar text uzunligi 0 dan kotta bo'sa (hatolarni oldini olish uchun
         try:
             if chat_id>0: #lichka bo'sa
