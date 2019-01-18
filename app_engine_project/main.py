@@ -93,14 +93,6 @@ def soatlar():
             except:
                 #off.append(i)
                 'ex'
-        for i in soatid:#des.split('\n')
-            try:
-                kun=(datetime.now() + timedelta(hours=5)).strftime('%Y-%m-%d')
-                soat=(datetime.now() + timedelta(hours=5)).strftime('%H:%M')
-                bio=bot.get_chat(i).description
-                bot.set_chat_description(i, "📆 {0} ⏰{1}{2}".format(str(kun),str(soat),str(bio.replace(bio.split('\n')[0],''))))
-            except:
-                'ex'
     return
 
 @bot.message_handler(func=lambda message: True)
