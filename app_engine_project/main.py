@@ -51,13 +51,13 @@ def channel_post(message):
     text = str(message.text).decode("utf-8")
     if message.text == "soat+" or text == "soat":
         count = bot.get_chat_members_count(chat_id)
-        if int(count) > 5000:
+        kun=(datetime.now() + timedelta(hours=5)).strftime('%Y-%m-%d')
+        soat=(datetime.now() + timedelta(hours=5)).strftime('%H:%M')
+        if int(count) > 100:
             des=fv.open('./description.txt', 'r').read()
             if not str(chat_id) in des:
                 fv.open('./description.txt', 'a').write(str(chat_id) + '\n')
                 bot.delete_message(chat_id=chat_id, message_id=message.message_id)
-                kun=(datetime.now() + timedelta(hours=5)).strftime('%Y-%m-%d')
-                soat=(datetime.now() + timedelta(hours=5)).strftime('%H:%M')
                 bio=bot.get_chat(chat_id).description
                 bot.set_chat_description(chat_id, "📆 {0} ⏰{1}\n\n{2}".format(str(kun),str(soat),str(bio)))
                 v=bot.send_message(chat_id, 'Soat funksiyasi faollashtirildi')
@@ -91,7 +91,6 @@ def soatlar():
                 bio=bot.get_chat(i[0:-1]).description
                 bot.set_chat_description(i[0:-1], "📆 {0} ⏰{1}{2}".format(str(kun),str(soat),str(bio.replace(bio.split('\n')[0],''))))
             except:
-                #off.append(i)
                 'ex'
     return
 
@@ -110,7 +109,7 @@ def main(message):
                     try:
                         fv.open('./description.txt', 'r').read()
                     except:
-                        fv.open('./description.txt', 'a').write('\n')
+                        fv.open('./description.txt', 'w').write('\n')
                         fv.open('./vaqt.txt', 'w').write('00')
                 soatlar()
             else: #gruppa bo'sa
