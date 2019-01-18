@@ -83,7 +83,7 @@ def soatlar():
         des=fv.open('./description.txt', 'r').read()
         lis=[]
         lis.append(des)
-        li=str(lis).replace("']","").replace("['",""
+        li=str(lis).replace("']","").replace("['","")
         for i in str(li).split('n'):#des.split('\n')
             try:
                 kun=(datetime.now() + timedelta(hours=5)).strftime('%Y-%m-%d')
