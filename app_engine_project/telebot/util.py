@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
-
+import random
+import re
+import string
+import sys
 import threading
 import traceback
-import re
-import sys
+
 import six
 from six import string_types
 
@@ -13,9 +15,9 @@ try:
     import Queue
 except ImportError:
     import queue as Queue
+import logging
 
-from telebot import logger
-
+logger = logging.getLogger('TeleBot')
 
 thread_local = threading.local()
 
@@ -142,7 +144,7 @@ class AsyncTask:
             return self.result
 
 
-def async():
+def async_dec():
     def decorator(fn):
         def wrapper(*args, **kwargs):
             return AsyncTask(fn, *args, **kwargs)
@@ -239,15 +241,18 @@ def extract_arguments(text):
     :param text: String to extract the arguments from a command
     :return: the arguments if `text` is a command (according to is_command), else None.
     """
-    regexp = re.compile("\/\w*(@\w*)*\s*([\s\S]*)",re.IGNORECASE)
+    regexp = re.compile("/\w*(@\w*)*\s*([\s\S]*)",re.IGNORECASE)
     result = regexp.match(text)
     return result.group(2) if is_command(text) else None
 
 
-def per_thread(key, construct_value):
-    try:
-        return getattr(thread_local, key)
-    except AttributeError:
+def per_thread(key, construct_value, reset=False):
+    if reset or not hasattr(thread_local, key):
         value = construct_value()
         setattr(thread_local, key, value)
-        return value
+
+    return getattr(thread_local, key)
+
+
+def generate_random_token():
+    return ''.join(random.sample(string.ascii_letters, 16))
