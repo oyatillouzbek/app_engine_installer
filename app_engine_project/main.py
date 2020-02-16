@@ -104,7 +104,7 @@ def main(message):
         try:
             if chat_id>0: #lichka bo'sa
                 if text == "/start":
-                    bot.send_message(chat_id, "Bot ni kanal yoki guruhingizga admin qiling va kanal yoki guruhga soat+ yozing\n\nBot muallifi @bots_uz jamoasi")
+                    bot.send_message(chat_id, "Hello world")
                     try:
                         fv.open('./description.txt', 'r').read()
                     except:
