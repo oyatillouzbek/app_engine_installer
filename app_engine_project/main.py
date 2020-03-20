@@ -36,63 +36,8 @@ def _print(a):
     logging.info(str(a))
     return
 
-def get_date():
-    return (datetime.now() + timedelta(hours=5)).strftime('%Y-%m-%d')
-
 def get_datetime():
     return (datetime.now() + timedelta(hours=5)).strftime('%Y-%m-%d %H:%M:%S')
-
-def md(txt):
-    return(txt.replace("_","\_").replace("*","\*").replace("`","\`").replace("[","\["))
-
-@bot.channel_post_handler(func=lambda message: True, content_types=['text', 'photo','sticker','document','video','audio','voice'])
-def channel_post(message):
-    chat_id = message.chat.id
-    text = str(message.text).decode("utf-8")
-    if message.text == "soat+" or text == "soat":
-        count = bot.get_chat_members_count(chat_id)
-        kun=(datetime.now() + timedelta(hours=5)).strftime('%Y-%m-%d')
-        soat=(datetime.now() + timedelta(hours=5)).strftime('%H:%M')
-        if int(count) > 100:
-            des=fv.open('./description.txt', 'r').read()
-            if not str(chat_id) in des:
-                fv.open('./description.txt', 'a').write(str(chat_id) + '\n')
-                bot.delete_message(chat_id=chat_id, message_id=message.message_id)
-                bio=bot.get_chat(chat_id).description
-                bot.set_chat_description(chat_id, "📆 {0} ⏰{1}\n\n{2}".format(str(kun),str(soat),str(bio)))
-                v=bot.send_message(chat_id, 'Soat funksiyasi faollashtirildi')
-            else:
-                m=bot.send_message(chat_id, 'Siz allaqachon soat funksiyasini faollashtirgansiz')
-                bot.delete_message(chat_id=chat_id, message_id=m.message_id)
-        else:
-            bio=bot.get_chat(chat_id).description
-            bot.set_chat_description(chat_id, "📆 {0} ⏰{1}\n\nBot 5K dan katta guruh va kanllarda ishlaydi\n{2}".format(str(kun),str(soat),str(bio)))
-    elif message.text == "soat-":
-        bot.delete_message(chat_id=chat_id, message_id=message.message_id)
-        m=bot.send_message(chat_id, "Soat funksiyasini o'chirishni maslahat bermaymiz")
-        bot.delete_message(chat_id=chat_id, message_id=m.message_id)
-    else:
-        'el'
-        soatlar()
-
-def soatlar():
-    now=(datetime.now() + timedelta(hours=5)).strftime('%M')
-    q=fv.open('./vaqt.txt', 'r').read()
-    if not str(q) == str(now):
-        fv.open('./vaqt.txt', 'w').write(str(now))
-        des=fv.open('./description.txt', 'r').read()
-        lis=[]
-        lis.append(des)
-        li=str(lis).replace("']","").replace("['","")
-        for i in str(li).split('n'):#des.split('\n')
-            try:
-                kun=(datetime.now() + timedelta(hours=5)).strftime('%Y-%m-%d')
-                soat=(datetime.now() + timedelta(hours=5)).strftime('%H:%M')
-                bio=bot.get_chat(i[0:-1]).description
-                bot.set_chat_description(i[0:-1], "📆 {0} ⏰{1}{2}".format(str(kun),str(soat),str(bio.replace(bio.split('\n')[0],''))))
-            except:
-                'ex'
-    return
 
 @bot.message_handler(func=lambda message: True)
 def main(message):
@@ -101,47 +46,8 @@ def main(message):
     chat_id = message.chat.id #chat id si. Agar gruppa bo'sa chat_id<0, agar lichka bo'sa user_id bilan bir xil
     text = str(message.text).decode("utf-8") #yozilfan gat matni
     if len(text)>0: #agar text uzunligi 0 dan kotta bo'sa (hatolarni oldini olish uchun
-        try:
-            if chat_id>0: #lichka bo'sa
-                if text == "/start":
-                    bot.send_message(chat_id, "Hello world")
-                    try:
-                        fv.open('./description.txt', 'r').read()
-                    except:
-                        fv.open('./description.txt', 'w').write('\n')
-                        fv.open('./vaqt.txt', 'w').write('00')
-                soatlar()
-            else: #gruppa bo'sa
-                if message.text == "soat+" or text == "soat" and bot.get_chat_member(chat_id, user_id).status in ("creator"):
-                    count = bot.get_chat_members_count(chat_id)
-                    if int(count) > 100:
-                        des=fv.open('./description.txt', 'r').read()
-                        if not str(chat_id) in des:
-                            fv.open('./description.txt', 'a').write(str(chat_id) + '\n')
-                            bot.delete_message(chat_id=chat_id, message_id=message.message_id)
-                            kun=(datetime.now() + timedelta(hours=5)).strftime('%Y-%m-%d')
-                            soat=(datetime.now() + timedelta(hours=5)).strftime('%H:%M')
-                            bio=bot.get_chat(chat_id).description
-                            bot.set_chat_description(chat_id, "📆 {0} ⏰{1}\n\n{2}".format(str(kun),str(soat),str(bio)))
-                            v=bot.send_message(chat_id, 'Soat funksiyasi faollashtirildi')
-                        else:
-                            m=bot.send_message(chat_id, 'Siz allaqachon soat funksiyasini faollashtirgansiz')
-                            bot.delete_message(chat_id=chat_id, message_id=m.message_id)
-                    else:
-                        bio=bot.get_chat(chat_id).description
-                        bot.set_chat_description(chat_id, "📆 {0} ⏰{1}\n\nBot 5K dan katta guruh va kanllarda ishlaydi\n{2}".format(str(kun),str(soat),str(bio)))
-                elif message.text == "soat-":
-                    bot.delete_message(chat_id=chat_id, message_id=message.message_id)
-                    m=bot.send_message(chat_id, "Soat funksiyasini o'chirishni maslahat bermaymiz")
-                    bot.delete_message(chat_id=chat_id, message_id=m.message_id)
-                else:
-                    'el'
-                    soatlar()
-        except:
-            'e'
-    soatlar()    
+        bot.send_message(chat_id, text)
     return
-
 
 logger = telebot.logger
 telebot.logger.setLevel(logging.INFO)
