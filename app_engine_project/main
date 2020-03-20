@@ -29,6 +29,9 @@ isdigid = ''
 bot = telebot.TeleBot(API_TOKEN, threaded=False)
 bot_id = int(API_TOKEN.split(":")[0])
 webhook_key = (API_TOKEN.split(":")[1])[:-20]
+def admin(user_id):
+    Admins = [164135965] #Adminlar id si ro'yhati. Bu yerga o'zingizni id raqamingizni yozing. Tel raqam emas, telegramdagi id raqam
+    return user_id in Admins
 
 
 def _print(a):
