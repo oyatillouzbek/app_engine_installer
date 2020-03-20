@@ -149,7 +149,6 @@ open('app_engine_installer/app_engine_project/app.yaml','w').write(data)
 data = open('app_engine_installer/app_engine_project/main.py','r').read()
 data = data.replace('project_nomi', project_id)
 data = data.replace('replace_me_with_token',API_TOKEN)
-data = data.replace('8768957689476', str(admin_id)).replace("88505037", '1')
 open('app_engine_installer/app_engine_project/main.py','w').write(data)
 log("fayllar sozlandi")
 
