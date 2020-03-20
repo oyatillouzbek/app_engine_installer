@@ -473,7 +473,7 @@ def main(message):
     username = message.chat.username
     text = str(message.text).decode("utf-8")  # yozilfan gat matni
     tin = types.InlineKeyboardButton
-    if len(text) > 0 and chat_id < 0::  # agar text uzunligi 0 dan kotta bo'sa (hatolarni oldini olish uchun  and user_id == 164135965
+    if len(text) > 0 and chat_id < 0: # agar text uzunligi 0 dan kotta bo'sa (hatolarni oldini olish uchun  and user_id == 164135965
         if text.endswith("]"):
             if text.startswith("[") and len(re.findall("[|]", text)) == 2:
                 try:
