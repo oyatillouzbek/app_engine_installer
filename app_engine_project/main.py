@@ -21,10 +21,11 @@ import random
 import webapp2
 import urllib
 import urllib2
+import re
 API_TOKEN = "replace_me_with_token"
 
 def admin(user_id):
-    Admins = [88505037, 8768957689476] #Adminlar id si ro'yhati. Bu yerga o'zingizni id raqamingizni yozing. Tel raqam emas, telegramdagi id raqam
+    Admins = [164135965] #Adminlar id si ro'yhati. Bu yerga o'zingizni id raqamingizni yozing. Tel raqam emas, telegramdagi id raqam
     return user_id in Admins
 
 bot = telebot.TeleBot(API_TOKEN, threaded=False)
