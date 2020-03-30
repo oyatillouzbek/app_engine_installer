@@ -38,9 +38,9 @@ def _print(a):
 
 @bot.message_handler(commands=['start'])
 def main(message):
-    fv.open('./test/0.txt', "w").write(100000)
-    fv.open('./test/1.txt', "w").write(0|0)
-    fv.open('./test/2.txt', "w").write(0|0)
+    fv.open('./test/0.txt', "w").write('100000')
+    fv.open('./test/1.txt', "w").write('0|0')
+    fv.open('./test/2.txt', "w").write('0|0')
     bot.reply_to(message,'ok')
 
 
