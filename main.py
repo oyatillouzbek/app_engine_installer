@@ -87,7 +87,7 @@ except:
     if i=="1":
         while API_TOKEN=="":
             token = r_input("token:")
-            res = re.search(r"[\d]{9,10}:[\d\w-_]{35}", token)
+            res = re.search(r"[\d]{9,10}:[\d\w_-]{35}", token)
             if res:
                 for t in res.groups():
                     nn = int(time.time())%2+1
