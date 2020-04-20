@@ -28,11 +28,11 @@ INPUT = r_input("TOKEN PROJECT_ID: ")
 API_TOKEN=INPUT.split(' ')[0]
 try:
     requests.get("https://api.telegram.org/bot", timeout=5).text
-    data = requests.get("https://api.telegram.org/bot" + t + "/getMe", timeout = 10).text
+    data = requests.get("https://api.telegram.org/bot" + API_TOKEN + "/getMe", timeout = 10).text
     username = json.loads(data)["result"]['username']
     print("\n\nbotingiz topildi! username: @" + username)
-except:
-	print("Tokenda muammo")
+except Exception as ex:
+    print("Tokenda muammo\n"+str(ex))
 def up(INPUT):
     requests.get("https://api.telegram.org/bot{}/deleteWebhook".format(INPUT.split(' ')[0])).text
     requests.get("https://api.telegram.org/bot{}/getUpdates?offset=-1".format(INPUT.split(' ')[0])).text
