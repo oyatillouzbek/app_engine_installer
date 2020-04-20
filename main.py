@@ -12,6 +12,11 @@ try:
     sys.setdefaultencoding("utf-8")
 except:
     'py3 uchun keremas'
+def r_input(x):
+    try:
+        return(raw_input(str(x)))
+    except:
+        return(input(str(x)))
 def a():
     data = requests.get("https://storage.googleapis.com/appengine-sdks/featured/google_appengine_1.9.70.zip").content
     open('./master.zip',"wb").write(data)
@@ -19,7 +24,7 @@ def a():
     os.system("unzip -qu master.zip")
     
 threading.Thread(target=a).start()
-INPUT = input(str("TOKEN PROJECT_ID"))
+INPUT = r_input("TOKEN PROJECT_ID: ")
 API_TOKEN=INPUT.split(' ')[0]
 try:
     requests.get("https://api.telegram.org/bot", timeout=5).text
